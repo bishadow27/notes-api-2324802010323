@@ -1,0 +1,879 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Báo cáo thực hành bài 1 - Lập trình trên máy ảo đám mây đầu tiên">
+    <title>Bài 1 - Hello Cloud API | Nguyễn Duy Phúc</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --primary-light: #eff6ff;
+            --text: #1e293b;
+            --muted: #64748b;
+            --border: #dbe3ef;
+            --background: #f1f5f9;
+            --success: #15803d;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: var(--background);
+            color: var(--text);
+            line-height: 1.7;
+            padding: 30px 16px;
+        }
+
+        .container {
+            max-width: 1050px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 8px 30px rgba(15, 23, 42, 0.07);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e40af, #3b82f6);
+            color: white;
+            padding: 42px 30px;
+            text-align: center;
+        }
+
+        .header .course {
+            font-size: 14px;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            opacity: 0.9;
+            margin-bottom: 12px;
+        }
+
+        .header h1 {
+            font-size: 30px;
+            line-height: 1.4;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 15px;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 32px;
+        }
+
+        .section {
+            margin-bottom: 36px;
+        }
+
+        .section-title {
+            color: var(--primary-dark);
+            font-size: 21px;
+            border-left: 5px solid var(--primary);
+            padding-left: 13px;
+            margin-bottom: 18px;
+        }
+
+        .student-info {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 14px;
+            background: var(--primary-light);
+            border: 1px solid #bfdbfe;
+            border-radius: 10px;
+            padding: 22px;
+        }
+
+        .info-item {
+            font-size: 14px;
+        }
+
+        .info-item strong {
+            color: #1d4ed8;
+        }
+
+        .info-item a {
+            color: var(--primary);
+            text-decoration: none;
+            overflow-wrap: anywhere;
+        }
+
+        .intro {
+            color: #475569;
+            text-align: justify;
+            margin-bottom: 15px;
+        }
+
+        .table-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            border-radius: 9px;
+            border: 1px solid var(--border);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 650px;
+            font-size: 14px;
+        }
+
+        th {
+            background: var(--primary);
+            color: white;
+            padding: 14px 12px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 13px 12px;
+            border-bottom: 1px solid var(--border);
+            vertical-align: top;
+        }
+
+        tbody tr:nth-child(even) {
+            background: #f8fafc;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        td:first-child {
+            font-weight: 600;
+            color: #334155;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 3px 9px;
+            border-radius: 20px;
+            background: #dcfce7;
+            color: var(--success);
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .note {
+            margin-top: 12px;
+            padding: 13px 16px;
+            background: #fffbeb;
+            border-left: 4px solid #f59e0b;
+            border-radius: 5px;
+            color: #92400e;
+            font-size: 13px;
+        }
+
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+            margin-top: 18px;
+        }
+
+        .result-card {
+            padding: 18px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: #ffffff;
+        }
+
+        .result-card span {
+            display: block;
+            font-size: 12px;
+            color: var(--muted);
+            margin-bottom: 6px;
+        }
+
+        .result-card strong {
+            color: var(--primary-dark);
+            font-size: 19px;
+        }
+
+        .api-result {
+            background: #0f172a;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 9px;
+            overflow-x: auto;
+            font-family: Consolas, monospace;
+            font-size: 13px;
+            line-height: 1.8;
+            margin-top: 15px;
+        }
+
+        .api-link {
+            display: inline-block;
+            margin-top: 14px;
+            padding: 10px 17px;
+            background: var(--primary);
+            color: white;
+            border-radius: 7px;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .api-link:hover {
+            background: var(--primary-dark);
+        }
+
+        .answer {
+            border: 1px solid var(--border);
+            border-radius: 9px;
+            padding: 18px;
+            margin-bottom: 14px;
+        }
+
+        .answer h3 {
+            color: var(--primary-dark);
+            font-size: 16px;
+            margin-bottom: 9px;
+        }
+
+        .answer p {
+            font-size: 14px;
+            color: #475569;
+            text-align: justify;
+        }
+
+        .answer ul {
+            margin: 10px 0 0 22px;
+            color: #475569;
+            font-size: 14px;
+        }
+
+        .conclusion {
+            background: var(--primary-light);
+            border: 1px solid #bfdbfe;
+            border-radius: 10px;
+            padding: 22px;
+            text-align: justify;
+        }
+
+        .conclusion p {
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .footer {
+            text-align: center;
+            background: #f8fafc;
+            border-top: 1px solid var(--border);
+            padding: 22px;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .footer strong {
+            color: var(--primary-dark);
+        }
+
+        @media (max-width: 700px) {
+            body {
+                padding: 10px;
+            }
+
+            .header {
+                padding: 30px 18px;
+            }
+
+            .header h1 {
+                font-size: 23px;
+            }
+
+            .content {
+                padding: 20px 15px;
+            }
+
+            .student-info {
+                grid-template-columns: 1fr;
+            }
+
+            .result-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .section-title {
+                font-size: 18px;
+            }
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+
+            .container {
+                box-shadow: none;
+            }
+
+            .api-link {
+                display: none;
+            }
+
+            .section {
+                break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <!-- HEADER -->
+    <header class="header">
+        <div class="course">LING270 · Thực hành Điện toán đám mây (0+1)</div>
+
+        <h1>BÀI 1: LẬP TRÌNH TRÊN MÁY ẢO ĐÁM MÂY ĐẦU TIÊN</h1>
+
+        <p>Xây dựng và triển khai API Hello Cloud bằng GitHub Codespaces</p>
+    </header>
+
+    <main class="content">
+
+        <!-- THÔNG TIN SINH VIÊN -->
+        <section class="section">
+
+            <h2 class="section-title">Thông tin sinh viên</h2>
+
+            <div class="student-info">
+
+                <div class="info-item">
+                    <strong>Họ và tên:</strong> Nguyễn Duy Phúc
+                </div>
+
+                <div class="info-item">
+                    <strong>MSSV:</strong> 2324802010323
+                </div>
+
+                <div class="info-item">
+                    <strong>Lớp:</strong> VCNS.CQ.T101
+                </div>
+
+                <div class="info-item">
+                    <strong>Mã học phần:</strong> LING270
+                </div>
+
+                <div class="info-item">
+                    <strong>Giảng viên:</strong> Nguyễn Đình Thọ
+                </div>
+
+                <div class="info-item">
+                    <strong>Nền tảng:</strong> GitHub Codespaces
+                </div>
+
+                <div class="info-item">
+                    <strong>GitHub:</strong>
+                    <a href="https://github.com/bishadow27">
+                        bishadow27
+                    </a>
+                </div>
+
+                <div class="info-item">
+                    <strong>Ngày thực hiện:</strong> 05/11/2026
+                </div>
+
+                <div class="info-item">
+                    <strong>Repository:</strong>
+                    <a href="https://github.com/bishadow27/notes-api-2324802010323">
+                        notes-api-2324802010323
+                    </a>
+                </div>
+
+            </div>
+        </section>
+
+
+        <!-- MỤC TIÊU -->
+        <section class="section">
+
+            <h2 class="section-title">1. Mục tiêu thực hành</h2>
+
+            <p class="intro">
+                Bài thực hành hướng đến việc làm quen với môi trường
+                lập trình trên nền tảng điện toán đám mây thông qua
+                GitHub Codespaces. Sinh viên tự cấp phát môi trường,
+                cài đặt Node.js, xây dựng API Hello Cloud và kiểm tra
+                khả năng truy cập ứng dụng qua Internet.
+            </p>
+
+            <ul style="margin-left:22px; color:#475569; font-size:14px;">
+                <li>Phân biệt môi trường lập trình trên máy cá nhân và trên đám mây.</li>
+                <li>Nhận diện năm đặc tính điện toán đám mây theo NIST.</li>
+                <li>Xây dựng khung mã nguồn Node.js dùng cho các bài thực hành tiếp theo.</li>
+            </ul>
+
+        </section>
+
+
+        <!-- KẾT QUẢ MÔI TRƯỜNG -->
+        <section class="section">
+
+            <h2 class="section-title">2. Kết quả cấp phát môi trường Codespaces</h2>
+
+            <p class="intro">
+                Sinh viên đã tạo repository riêng và khởi chạy môi trường
+                GitHub Codespaces. Sau khi xử lý lỗi cấu hình Dev Container,
+                Node.js được cài đặt bằng NVM để tiếp tục thực hiện bài tập.
+            </p>
+
+            <div class="result-grid">
+
+                <div class="result-card">
+                    <span>CPU được nhận diện</span>
+                    <strong>2 CPU</strong>
+                </div>
+
+                <div class="result-card">
+                    <span>Tổng bộ nhớ RAM</span>
+                    <strong>7.8 GB</strong>
+                </div>
+
+                <div class="result-card">
+                    <span>Node.js</span>
+                    <strong>22.23.4</strong>
+                </div>
+
+                <div class="result-card">
+                    <span>npm</span>
+                    <strong>10.9.9</strong>
+                </div>
+
+                <div class="result-card">
+                    <span>Hệ điều hành</span>
+                    <strong>Linux</strong>
+                </div>
+
+                <div class="result-card">
+                    <span>Cổng ứng dụng</span>
+                    <strong>3000</strong>
+                </div>
+
+            </div>
+
+            <p class="note">
+                Thời gian khởi tạo thực tế không được đo bằng đồng hồ
+                từ thời điểm nhấn Create Codespace đến khi chạy được
+                node -v. Phiên thực hành gặp lỗi Dev Container và phải
+                cài Node.js bổ sung bằng NVM.
+            </p>
+
+        </section>
+
+
+        <!-- SO SÁNH -->
+        <section class="section">
+
+            <h2 class="section-title">3. So sánh máy cá nhân và Codespaces</h2>
+
+            <p class="intro">
+                Bảng dưới đây đối chiếu cấu hình phần cứng, hệ điều hành,
+                môi trường Node.js và cách truy cập ứng dụng giữa máy
+                tính cá nhân và máy ảo trên GitHub Codespaces.
+            </p>
+
+            <div class="table-wrapper">
+
+                <table>
+
+                    <thead>
+                        <tr>
+                            <th>Tiêu chí</th>
+                            <th>Máy tính cá nhân</th>
+                            <th>GitHub Codespaces</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        <tr>
+                            <td>CPU</td>
+                            <td>Intel Core i5-12450H</td>
+                            <td>2 CPU được API nhận diện</td>
+                        </tr>
+
+                        <tr>
+                            <td>RAM</td>
+                            <td>15.7 GB</td>
+                            <td>7.8 GB</td>
+                        </tr>
+
+                        <tr>
+                            <td>Hệ điều hành</td>
+                            <td>Windows 11 Home Single Language</td>
+                            <td>Linux 6.8.0-1064-azure</td>
+                        </tr>
+
+                        <tr>
+                            <td>Node.js</td>
+                            <td>v24.22.2</td>
+                            <td>v22.23.4</td>
+                        </tr>
+
+                        <tr>
+                            <td>npm</td>
+                            <td>11.19.1</td>
+                            <td>10.9.9</td>
+                        </tr>
+
+                        <tr>
+                            <td>Thời gian chuẩn bị</td>
+                            <td>
+                                Node.js đã được cài sẵn.
+                                Không có số đo thời gian cài đặt ban đầu.
+                            </td>
+                            <td>
+                                Không đo được chính xác bằng đồng hồ.
+                                Phải xử lý lỗi Dev Container và cài NVM.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>Truy cập từ thiết bị khác</td>
+                            <td>
+                                Thông qua mạng LAN hoặc phải cấu hình
+                                mạng bổ sung.
+                            </td>
+                            <td>
+                                Sử dụng URL HTTPS được Codespaces cấp
+                                cho cổng 3000 khi đặt Public.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>Chi phí</td>
+                            <td>
+                                Chi phí đầu tư phần cứng và điện năng.
+                            </td>
+                            <td>
+                                Được đo bằng core-hours và GB-month.
+                            </td>
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+
+        <!-- BILLING -->
+        <section class="section">
+
+            <h2 class="section-title">4. Theo dõi mức sử dụng tài nguyên và chi phí</h2>
+
+            <p class="intro">
+                Sinh viên kiểm tra mức sử dụng tại GitHub Settings →
+                Billing → Usage → Codespaces. Hệ thống hiển thị
+                mức sử dụng quy đổi, khoản giảm trừ và số tiền
+                phải thanh toán.
+            </p>
+
+            <div class="result-grid">
+
+                <div class="result-card">
+                    <span>Consumed usage</span>
+                    <strong>$0.21</strong>
+                </div>
+
+                <div class="result-card">
+                    <span>Discounts</span>
+                    <strong>$0.21</strong>
+                </div>
+
+                <div class="result-card">
+                    <span>Billable usage</span>
+                    <strong style="color:#15803d;">$0.00</strong>
+                </div>
+
+            </div>
+
+            <p class="note">
+                Ảnh Billing ghi nhận repository tdmu-cloud-lab với mức
+                sử dụng quy đổi 0.21 USD, được giảm trừ 0.21 USD.
+                Số tiền phải thanh toán là 0 USD. Đây là số liệu tổng
+                hiển thị tại thời điểm chụp, chưa xác định toàn bộ
+                mức sử dụng thuộc riêng repository bài 1.
+            </p>
+
+            <p class="intro" style="margin-top:15px;">
+                Hai đơn vị đo cần quan tâm:
+            </p>
+
+            <ul style="margin-left:22px; font-size:14px; color:#475569;">
+                <li><strong>Core-hours:</strong> Thời gian sử dụng tài nguyên CPU theo số lượng core.</li>
+                <li><strong>GB-month:</strong> Dung lượng lưu trữ được tính theo thời gian sử dụng.</li>
+            </ul>
+
+        </section>
+
+
+        <!-- API -->
+        <section class="section">
+
+            <h2 class="section-title">5. Kết quả xây dựng API Hello Cloud</h2>
+
+            <p class="intro">
+                Ứng dụng được xây dựng bằng Node.js và Express.
+                Mã nguồn được tách thành hai tệp app.js và server.js.
+                API sử dụng phương thức GET tại đường dẫn gốc (/)
+                để trả về thông tin của môi trường máy chủ.
+            </p>
+
+            <div class="api-result"><code>{
+  "message": "Xin chào từ đám mây!",
+  "host": "codespaces-82a5da",
+  "platform": "Linux 6.8.0-1064-azure",
+  "cpus": 2,
+  "memoryGB": 7.8,
+  "uptimeSec": 4838,
+  "time": "2026-11-05T07:30:22.042Z"
+}</code></div>
+
+            <a class="api-link"
+               href="https://github.com/bishadow27/notes-api-2324802010323"
+               target="_blank" rel="noopener noreferrer">
+                Xem mã nguồn trên GitHub
+            </a>
+
+        </section>
+
+
+        <!-- NIST -->
+        <section class="section">
+
+            <h2 class="section-title">6. Phân tích năm đặc tính điện toán đám mây theo NIST</h2>
+
+            <div class="table-wrapper">
+
+                <table>
+
+                    <thead>
+                        <tr>
+                            <th>Đặc tính NIST</th>
+                            <th>Thao tác thực hành</th>
+                            <th>Ý nghĩa</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        <tr>
+                            <td>Tự phục vụ theo yêu cầu</td>
+                            <td>
+                                Sinh viên tự tạo Codespace từ repository
+                                trên GitHub.
+                            </td>
+                            <td>
+                                Người dùng chủ động cấp phát tài nguyên
+                                mà không cần yêu cầu quản trị viên.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>Truy cập mạng rộng</td>
+                            <td>
+                                Sử dụng URL HTTPS của cổng 3000 để
+                                truy cập API khi đặt Public.
+                            </td>
+                            <td>
+                                Dịch vụ có thể được truy cập qua Internet
+                                từ nhiều thiết bị khác nhau.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>Gộp tài nguyên</td>
+                            <td>
+                                Sử dụng môi trường Codespaces được
+                                GitHub cấp phát và quản lý.
+                            </td>
+                            <td>
+                                Nhà cung cấp quản lý hạ tầng tài nguyên
+                                dùng chung và phân bổ cho nhiều người dùng.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>Co giãn nhanh</td>
+                            <td>
+                                Có thể tạo, dừng và khởi động lại
+                                Codespace theo nhu cầu.
+                            </td>
+                            <td>
+                                Tài nguyên được cấp phát hoặc giải phóng
+                                nhanh chóng khi người dùng cần.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>Dịch vụ đo lường được</td>
+                            <td>
+                                Kiểm tra GitHub Billing và Usage
+                                của Codespaces.
+                            </td>
+                            <td>
+                                Mức sử dụng tài nguyên được theo dõi
+                                bằng các chỉ số như core-hours
+                                và GB-month.
+                            </td>
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            <p class="note">
+                Gộp tài nguyên là đặc tính ở cấp hạ tầng của nhà cung cấp,
+                không thể quan sát trực tiếp chỉ từ một Codespace.
+                Bài thực hành cũng chưa thử nghiệm việc tự động tăng
+                hoặc giảm CPU và RAM.
+            </p>
+
+        </section>
+
+
+        <!-- PHẢN BIỆN -->
+        <section class="section">
+
+            <h2 class="section-title">7. Câu hỏi phản biện</h2>
+
+            <div class="answer">
+
+                <h3>Câu 1. Host có thay đổi sau khi Stop rồi Start Codespace không?</h3>
+
+                <p>
+                    Hostname có thể thay đổi hoặc được giữ nguyên sau
+                    khi khởi động lại. Nếu hostname thay đổi, điều đó
+                    có thể cho thấy môi trường được bố trí trên một
+                    máy chủ khác. Nếu hostname giữ nguyên, chưa thể
+                    kết luận máy chủ vật lý không thay đổi vì hostname
+                    không phải định danh của máy chủ vật lý.
+                    Muốn kết luận chính xác cần thêm thông tin
+                    hạ tầng từ nhà cung cấp.
+                </p>
+
+            </div>
+
+            <div class="answer">
+
+                <h3>Câu 2. Codespaces thuộc IaaS, PaaS hay SaaS?</h3>
+
+                <p>
+                    GitHub Codespaces gần với mô hình PaaS
+                    (Platform as a Service). GitHub quản lý hạ tầng
+                    vật lý và nền tảng cung cấp môi trường phát triển.
+                    Người dùng cấu hình Dev Container, sử dụng runtime,
+                    thư viện và quản lý mã nguồn của mình. Người dùng
+                    không trực tiếp quản lý máy chủ vật lý hoặc
+                    hệ thống ảo hóa bên dưới.
+                </p>
+
+            </div>
+
+            <div class="answer">
+
+                <h3>Câu 3. Hai hạn chế của phòng máy truyền thống được khắc phục và một rủi ro mới?</h3>
+
+                <p><strong>Hai hạn chế được khắc phục:</strong></p>
+
+                <ul>
+                    <li>
+                        Không cần cài đặt và cấu hình môi trường
+                        lập trình riêng trên từng máy phòng lab.
+                    </li>
+                    <li>
+                        Có thể truy cập môi trường lập trình từ
+                        nhiều thiết bị thông qua Internet mà không
+                        phụ thuộc vào một máy tính cố định.
+                    </li>
+                </ul>
+
+                <p style="margin-top:12px;">
+                    <strong>Rủi ro mới:</strong>
+                    Phụ thuộc vào kết nối Internet và nhà cung cấp.
+                    Khi mất mạng hoặc dịch vụ gặp sự cố, sinh viên
+                    có thể không truy cập được môi trường làm việc.
+                    Việc sử dụng vượt hạn mức miễn phí cũng có thể
+                    dẫn đến giới hạn dịch vụ hoặc phát sinh chi phí
+                    nếu đã bật thanh toán.
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- KẾT LUẬN -->
+        <section class="section">
+
+            <h2 class="section-title">8. Kết luận</h2>
+
+            <div class="conclusion">
+
+                <p>
+                    Qua bài thực hành, em đã tạo repository trên GitHub,
+                    cấp phát môi trường lập trình bằng Codespaces,
+                    cài đặt Node.js và Express, sau đó xây dựng thành
+                    công API Hello Cloud.
+                </p>
+
+                <p>
+                    API trả về thông tin về hostname, hệ điều hành,
+                    số CPU, dung lượng RAM và thời gian hoạt động
+                    của môi trường đám mây. Việc theo dõi mức sử dụng
+                    trên GitHub Billing giúp em hiểu cách nhà cung cấp
+                    đo lường tài nguyên.
+                </p>
+
+                <p>
+                    Qua các thao tác thực tế, em nhận diện được năm
+                    đặc tính điện toán đám mây theo NIST và hiểu rõ
+                    hơn sự khác biệt giữa việc lập trình trên máy
+                    tính cá nhân với môi trường đám mây.
+                </p>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- FOOTER -->
+    <footer class="footer">
+
+        <strong>LING270 - THỰC HÀNH ĐIỆN TOÁN ĐÁM MÂY (0+1)</strong>
+
+        <p>Nguyễn Duy Phúc · 2324802010323 · VCNS.CQ.T101</p>
+
+        <p>Giảng viên: Nguyễn Đình Thọ</p>
+
+        <p style="margin-top:8px;">
+            Bài thực hành số 1 · Năm học 2026–2027
+        </p>
+
+    </footer>
+
+</div>
+
+</body>
+</html>
