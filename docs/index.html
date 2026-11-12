@@ -343,7 +343,8 @@
         <p>Xây dựng và triển khai API Hello Cloud bằng GitHub Codespaces</p>
     </header>
 
-    <main class="content">
+    <nav aria-label="Điều hướng bài thực hành" style="padding:14px 32px;background:#eff6ff;display:flex;gap:24px;flex-wrap:wrap"><a href="#bai-1">Bài 1: Hello Cloud API</a><a href="#bai-2">Bài 2: Container và CloudSim Plus</a></nav>
+    <main class="content" id="bai-1">
 
         <!-- THÔNG TIN SINH VIÊN -->
         <section class="section">
@@ -853,6 +854,62 @@
 
             </div>
 
+        </section>
+
+
+        <!-- BÀI 2 -->
+        <section class="section" id="bai-2">
+            <h2 class="section-title">BÀI 2: CONTAINER VÀ MÔ PHỎNG ĐÁM MÂY BẰNG CLOUDSIM PLUS</h2>
+            <p class="intro">Bài thực hành đóng gói API thành Docker image, kiểm tra tài nguyên của hai container và phân phối image qua GitHub Container Registry (GHCR). Phần mô phỏng khảo sát ảnh hưởng của số VM, số Cloudlet và bộ lập lịch.</p>
+        </section>
+        <section class="section">
+            <h2 class="section-title">A. Docker Container</h2>
+            <h3>1. Tạo image và chạy container</h3>
+            <p class="intro">Dockerfile dùng Node.js 22 Alpine, cài phụ thuộc cần thiết cho môi trường chạy, sao chép mã nguồn và chạy ứng dụng bằng người dùng <code>node</code>. File <code>.dockerignore</code> loại trừ <code>node_modules</code>, <code>.env</code>, <code>.git</code> và <code>docs</code> khỏi build context.</p>
+            <pre class="api-result"><code>FROM node:22-alpine
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --omit=dev
+COPY src ./src
+ENV PORT=3000
+EXPOSE 3000
+USER node
+CMD ["node", "src/server.js"]</code></pre>
+            <p class="intro" style="margin-top:15px">Image <code>notes-api:1.0</code> được build lần đầu trong 14,1 giây; lần build có cache mất 0,5 giây. Dung lượng image trên đĩa là 251 MB, còn content size là 63,3 MB. Đây là hai chỉ số kích thước khác nhau.</p>
+            <p class="intro">Hai container <code>notes1</code> và <code>notes2</code> đều chạy API bình thường. Khi kiểm tra, notes1 dùng 13,2 MiB trên giới hạn 7,756 GiB; notes2 dùng 12,34 MiB trên giới hạn 128 MiB và được giới hạn 0,5 CPU. API trong cả hai vẫn báo 2 CPU và 7,8 GB RAM vì lấy thông tin từ API hệ điều hành thay vì đọc trực tiếp giới hạn cgroup.</p>
+            <h3>2. So sánh Codespaces và container</h3>
+            <div class="table-wrapper" tabindex="0" role="region" aria-label="So sánh Codespaces và container"><table>
+                <thead><tr><th scope="col">Tiêu chí</th><th scope="col">Codespaces</th><th scope="col">Docker container</th></tr></thead><tbody>
+                <tr><td>Thời gian</td><td>Chưa đo thời gian khởi tạo Codespace.</td><td>Lệnh <code>node -e "1"</code> trong container mất 0,384 giây; build image lần đầu 14,1 giây, có cache 0,5 giây.</td></tr>
+                <tr><td>Kích thước</td><td>Chưa đo kích thước môi trường.</td><td>Image dùng 251 MB trên đĩa; content size 63,3 MB.</td></tr>
+                <tr><td>Nhân hệ điều hành</td><td>Trong Bài 1, Linux <code>6.8.0-1064-azure</code> được ghi nhận.</td><td>Bài 2 ghi nhận kernel <code>6.8.0-1070-azure</code>; container dùng chung kernel của host chạy Docker.</td></tr>
+                <tr><td>Mức cô lập</td><td>Môi trường phát triển đám mây do GitHub cấp phát và quản lý, có thể sử dụng Dev Container.</td><td>Tiến trình được cô lập bằng các cơ chế như namespace và cgroup, nhưng dùng chung kernel của host.</td></tr>
+                </tbody></table></div>
+            <p class="note">0,384 giây chỉ là thời gian thực thi lệnh Node ngắn trong container, không phải thời gian API sẵn sàng hay thời gian khởi tạo Codespaces. Các phép đo này không cùng đối tượng để so sánh trực tiếp tốc độ khởi động.</p>
+            <h3 style="margin-top:18px">3. Push và pull image qua GHCR</h3>
+            <p class="intro">Image <code>ghcr.io/bishadow27/notes-api:1.0</code> đã được push lên GHCR. Sau khi đăng xuất GHCR và gỡ tag cục bộ, image được pull lại thành công và API chạy từ image GHCR tại cổng 3002. <a href="https://github.com/users/bishadow27/packages/container/package/notes-api">Xem package notes-api trên GHCR</a>.</p>
+        </section>
+        <section class="section">
+            <h2 class="section-title">B. Mô phỏng bằng CloudSim Plus</h2>
+            <p class="intro">Môi trường gồm Java 25, Maven 3.10.0 và CloudSim Plus 9.0.0, sử dụng ví dụ <code>BasicFirstExample</code>. Cấu hình gốc có một host 8 core, mỗi VM 4 core và mỗi Cloudlet 2 core. Các kết quả dưới đây được đối chiếu với log; FinishTime là thời điểm hoàn thành Cloudlet trong bảng kết quả, không phải thời điểm kết thúc toàn bộ mô phỏng.</p>
+            <div class="table-wrapper" tabindex="0" role="region" aria-label="Kết quả mô phỏng CloudSim Plus"><table>
+                <thead><tr><th scope="col">Lần</th><th scope="col">Cấu hình</th><th scope="col">FinishTime</th><th scope="col">Ghi chú</th></tr></thead><tbody>
+                <tr><td>0</td><td>Gốc: 2 VM, 4 Cloudlet</td><td>20,1 giây</td><td>4/4 SUCCESS</td></tr>
+                <tr><td>1</td><td>Nhân đôi VM: yêu cầu 4 VM</td><td>45,6 giây</td><td>Chỉ 2 VM được tạo; 4/4 Cloudlet SUCCESS</td></tr>
+                <tr><td>2</td><td>Nhân đôi Cloudlet: 8 Cloudlet</td><td>40,1 giây</td><td>Chỉ 4/8 SUCCESS, chưa hoàn thành toàn bộ</td></tr>
+                <tr><td>3</td><td>CloudletSchedulerSpaceShared</td><td>20,1 giây</td><td>4/4 SUCCESS</td></tr>
+                </tbody></table></div>
+            <p class="intro" style="margin-top:15px"><strong>Lần 1:</strong> Host có 8 core, mỗi VM cần 4 core nên chỉ đủ tạo 2 trong 4 VM được yêu cầu. Broker thử cấp phát lại nhiều lần, làm Cloudlet được xử lý muộn hơn.</p>
+            <p class="intro"><strong>Lần 2:</strong> Log cảnh báo Cloudlet 4–7 không được cấp đủ RAM và băng thông. Mô phỏng kết thúc ở 40,22 giây và hủy VM khi mỗi VM vẫn còn 2 Cloudlet đang chạy hoặc chờ. Chỉ Cloudlet 0–3 xuất hiện trong bảng SUCCESS với FinishTime 40,1 giây; đây không phải thời gian hoàn thành cả 8 Cloudlet.</p>
+            <p class="intro"><strong>Lần 3:</strong> SpaceShared và TimeShared đều cho 20,1 giây trong cấu hình này. Mỗi VM có 4 core và nhận 2 Cloudlet, mỗi Cloudlet cần 2 core, nên không có tranh chấp CPU buộc Cloudlet xếp hàng.</p>
+            <p class="intro">Bằng chứng: <a href="lab02-evidence/cloudsim-baseline.log">log gốc</a> · <a href="lab02-evidence/cloudsim-vms4.log">log 4 VM</a> · <a href="lab02-evidence/cloudsim-cloudlets8.log">log 8 Cloudlet</a> · <a href="lab02-evidence/cloudsim-spaceshared.log">log SpaceShared</a>.<br>Mã nguồn đối chiếu: <a href="lab02-evidence/BasicFirstExample-original.java">BasicFirstExample gốc</a> · <a href="lab02-evidence/BasicFirstExample-SpaceShared.java">phiên bản SpaceShared</a>.</p>
+        </section>
+        <section class="section">
+            <h2 class="section-title">C. Câu hỏi phản biện</h2>
+            <p class="intro">Các câu hỏi được diễn đạt theo nội dung cần phân tích, không phải trích nguyên văn đề thực hành.</p>
+            <div class="answer"><h3>1. Vì sao API vẫn nhận diện CPU và RAM của host?</h3><p>Giới hạn Docker được kernel thực thi qua cgroup; nó không nhất thiết thay đổi thông tin mà mọi API hệ điều hành trả về. Ứng dụng Node.js đang hỏi số CPU và tổng RAM theo góc nhìn hệ điều hành, thay vì đọc trực tiếp quota CPU và giới hạn bộ nhớ trong cgroup. Vì vậy notes2 vẫn báo 2 CPU và 7,8 GB RAM dù bị giới hạn 0,5 CPU và 128 MiB. Điều này không chứng minh container được phép dùng toàn bộ tài nguyên đó; cần kiểm tra cấu hình và chỉ số cgroup hoặc Docker để biết giới hạn thực tế. Với Java và Node.js, cần kiểm tra phiên bản runtime và API đang dùng có nhận biết giới hạn container hay không, thay vì giả định mọi hàm đều trả về quota cgroup. Cấu hình heap và số luồng theo giới hạn thực tế, đồng thời chừa bộ nhớ cho phần ngoài heap và hệ điều hành; vượt 128 MiB có thể khiến tiến trình bị kernel kết thúc do thiếu bộ nhớ.</p></div>
+            <div class="answer"><h3>2. TimeShared và SpaceShared khác nhau thế nào?</h3><p>TimeShared chia thời gian xử lý giữa các Cloudlet cùng sử dụng CPU; khi có tranh chấp, mỗi Cloudlet có thể tiến triển đồng thời với phần năng lực được chia. SpaceShared cấp các core cho Cloudlet đang chạy; Cloudlet chưa đủ core phải chờ. Trong thí nghiệm này, hai Cloudlet mỗi VM cần tổng cộng 4 core, đúng bằng số core của VM, nên không phải chờ vì thiếu core. Cả hai bộ lập lịch đều đạt 20,1 giây; kết quả này không có nghĩa chúng luôn bằng nhau khi tải tăng hoặc có tranh chấp. Với dịch vụ học trực tuyến cần nhiều học sinh tương tác đồng thời vào giờ cao điểm, em ưu tiên TimeShared để các yêu cầu cùng được tiến triển thay vì nhiều tác vụ phải chờ đủ core. Đổi lại, khi quá tải, mỗi tác vụ có thể chậm hơn; cần giới hạn tải và đo độ trễ thực tế. Nếu bài thi hoặc tác vụ quan trọng cần tài nguyên ổn định và khả năng dự đoán cao, SpaceShared có thể phù hợp hơn, nhưng phải chấp nhận hàng đợi và cấp đủ công suất.</p></div>
+            <div class="answer"><h3>3. Mô phỏng có giá trị và giới hạn gì trước triển khai thực tế?</h3><p>Mô phỏng giúp thử cấu hình và chính sách cấp phát với chi phí thấp, quan sát trước điểm nghẽn và các trường hợp không hoàn thành. Ví dụ, yêu cầu 4 VM trên host 8 core chỉ tạo được 2 VM, còn lần 8 Cloudlet chỉ có 4 Cloudlet thành công. Tuy nhiên, kết quả phụ thuộc mô hình, tham số và giả định; nó không tự phản ánh đầy đủ độ trễ và nghẽn mạng, tải biến động theo giờ học, tranh chấp tài nguyên giữa người dùng, hiệu năng lưu trữ, lỗi phần cứng, chi phí vận hành hoặc sai lệch giữa cấu hình mô phỏng và hệ thống thực tế. Vì vậy cần dùng mô phỏng để chọn phương án thử nghiệm, rồi đo và kiểm chứng trên hạ tầng thực trước khi kết luận.</p></div>
         </section>
 
     </main>
