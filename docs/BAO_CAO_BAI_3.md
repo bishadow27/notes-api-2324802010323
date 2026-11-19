@@ -63,16 +63,57 @@ Supabase Storage được thiết kế để lưu và phân phối đối tượ
 
 Mục tiêu chung là tăng khả năng chịu lỗi và duy trì khả năng truy cập dữ liệu khi một nút hoặc thiết bị lưu trữ gặp sự cố. Atlas nhân bản dữ liệu của replica set giữa Primary và Secondary. HDFS nhân bản từng block của tệp giữa các DataNode. NameNode quản lý metadata, không phải một bản sao dữ liệu block.
 
-## 5. Ảnh cần nộp
+## 5. Ảnh minh chứng thực tế
 
-- [ ] Ảnh terminal chạy **npm run smoke** với các kết quả PASS.
-- [ ] Ảnh terminal chạy **npm run explain** có bảng **docsExamined**.
-- [ ] Ảnh Atlas Overview/Metrics thể hiện replica set ba nút.
-- [ ] Ảnh bucket **attachments** có tệp thử và ảnh mở **attachmentUrl**.
-- [ ] Ảnh GitHub commit có thông điệp **Bai 3**.
-- [ ] Ảnh **git status** chứng minh không có tệp **.env**.
+### 1. Atlas project cloud-lab
 
-**Ghi chú:** Không tự điền số liệu đo hoặc đánh dấu PASS trước khi chạy trên dịch vụ thật. Ảnh minh chứng phải lấy từ môi trường thực hành của sinh viên.
+![Atlas project cloud-lab](lab03-evidence/01-atlas-project.png)
+
+### 2. Cluster0 Free tại Singapore
+
+![Cluster0 Free tại Singapore](lab03-evidence/02-cluster.png)
+
+### 3. Database user notes_app
+
+![Database user notes_app](lab03-evidence/03-database-user.png)
+
+### 4. Network Access
+
+![Network Access](lab03-evidence/04-network-access.png)
+
+### 5. Bucket attachments Public
+
+![Bucket attachments Public](lab03-evidence/05-supabase-bucket.png)
+
+### 6. Kiểm thử CRUD và upload
+
+![Kiểm thử CRUD và upload](lab03-evidence/06-crud-test.png)
+
+### 7. Tệp đã tải lên
+
+![Tệp đã tải lên](lab03-evidence/07-uploaded-file.png)
+
+### 8. Mở attachment URL
+
+![Mở attachment URL](lab03-evidence/08-attachment-url.png)
+
+### 9. Kết quả explain
+
+![Kết quả explain](lab03-evidence/09-explain.png)
+
+### 10. Replica set 3 nút
+
+![Replica set 3 nút](lab03-evidence/10-replica-set.png)
+
+### 11. Git status và .env
+
+![Git status và .env](lab03-evidence/11-git-status.png)
+
+### 12. Commit Bai 3
+
+![Commit Bai 3](lab03-evidence/12-github-commit.png)
+
+Ảnh 1, 2 và 10 dùng cùng một ảnh gốc. Ảnh 8 cho thấy URL mở được, nhưng tiếng Việt bị hiển thị sai mã hóa. Ảnh 9 là lần đo sau: IXSCAN 0 ms; thời gian thay đổi theo lần chạy.
 
 ## 6. Kết quả thực nghiệm trong Codespace
 
