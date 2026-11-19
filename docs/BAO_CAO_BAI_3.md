@@ -12,21 +12,25 @@
 
 ![Sơ đồ Atlas và HDFS](so-sanh-atlas-hdfs.svg)
 
+### Cấu hình dịch vụ thực tế
+
+MongoDB Atlas: cloud-lab, Cluster0 Free, AWS Singapore, replica set 3 nút; database notes, user notes_app có quyền readWrite trên notes. Supabase: notes-lab03 Free, Singapore; bucket attachments Public. Bí mật lưu trong .env và không đưa vào repository.
+
 ## 2. Minh chứng kiểm thử API
 
 Chạy **npm run smoke** sau khi API kết nối thành công với MongoDB Atlas và Supabase. Điền kết quả thực tế:
 
 | Tình huống | Mã HTTP mong đợi | Kết quả thực tế |
 |---|---:|---|
-| GET / | 200 | [Điền] |
-| POST /notes | 201 | [Điền] |
-| GET /notes và GET /notes/:id | 200 | [Điền] |
-| PUT /notes/:id | 200 | [Điền] |
-| DELETE /notes/:id | 204 | [Điền] |
-| GET ghi chú đã xóa | 404 | [Điền] |
-| ID không hợp lệ / thiếu title | 400 | [Điền] |
-| POST /notes/:id/attachment | 200 | [Điền] |
-| Mở attachmentUrl | 200 | [Điền] |
+| GET / | 200 | PASS |
+| POST /notes | 201 | PASS |
+| GET /notes và GET /notes/:id | 200 | PASS |
+| PUT /notes/:id | 200 | PASS |
+| DELETE /notes/:id | 204 | PASS |
+| GET ghi chú đã xóa | 404 | PASS |
+| ID không hợp lệ / thiếu title | 400 | PASS |
+| POST /notes/:id/attachment | 200 | PASS |
+| Mở attachmentUrl | 200 | PASS |
 
 ## 3. Kết quả đo hiệu quả chỉ mục
 
@@ -34,12 +38,12 @@ Chạy **npm run seed** để thêm 2.000 ghi chú mẫu, sau đó chạy **npm 
 
 | Phương pháp | docsExamined | nReturned | executionTimeMillis |
 |---|---:|---:|---:|
-| Quét toàn bộ (COLLSCAN) | [Điền] | [Điền] | [Điền] |
-| Dùng chỉ mục (IXSCAN) | [Điền] | [Điền] | [Điền] |
+| Quét toàn bộ (COLLSCAN) | 2000 | 571 | 1 |
+| Dùng chỉ mục (IXSCAN) | 571 | 571 | 1 |
 
 **Tỉ số giảm số tài liệu phải kiểm tra:**
 
-docsExamined(COLLSCAN) / docsExamined(IXSCAN) = **[Điền] lần**.
+docsExamined(COLLSCAN) / docsExamined(IXSCAN) = **3,50 lần**.
 
 Ưu tiên đánh giá **docsExamined**. Thời gian thực thi trên 2.000 tài liệu có thể chênh lệch nhỏ và chịu ảnh hưởng của độ trễ mạng, cache và tải cụm.
 
@@ -69,3 +73,16 @@ Mục tiêu chung là tăng khả năng chịu lỗi và duy trì khả năng tr
 - [ ] Ảnh **git status** chứng minh không có tệp **.env**.
 
 **Ghi chú:** Không tự điền số liệu đo hoặc đánh dấu PASS trước khi chạy trên dịch vụ thật. Ảnh minh chứng phải lấy từ môi trường thực hành của sinh viên.
+
+## 6. Kết quả thực nghiệm trong Codespace
+
+Ngày 19/11/2026, kết nối database `notes` trên Cluster0 thành công. `npm install` và `npm run check` chạy thành công. `npm run seed` xóa 0 ghi chú seed cũ và thêm 2.000 ghi chú mẫu.
+
+| Phương án | docsExamined | nReturned | executionTimeMillis |
+| --- | ---: | ---: | ---: |
+| COLLSCAN | 2000 | 571 | 1 |
+| IXSCAN | 571 | 571 | 1 |
+
+Tỉ số số tài liệu quét là 2000/571 ≈ 3,50 lần; thời gian 1 ms là số đo của lần chạy này.
+
+Kiểm thử CRUD qua HTTP với MongoDB Atlas: GET danh sách 200; POST 201; GET theo ID 200; PUT 200; ID không hợp lệ 400; POST thiếu title 400; DELETE 204; GET sau xóa 404. Ghi chú kiểm thử đã được xóa. Kiểm thử upload lên bucket attachments trả 200; truy cập URL công khai trả 200 (npm run smoke).
