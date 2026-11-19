@@ -1,11 +1,18 @@
 {
   "name": "notes-api-2324802010323",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "LING270 - Notes API and distributed storage labs",
+  "main": "src/server.js",
   "scripts": {
     "test": "node --test",
-    "start": "node src/server.js"
+    "start": "node src/server.js",
+    "check": "node --check src/app.js && node --check src/server.js && node --check src/db.js && node --check src/models/note.js && node --check src/routes/notes.js && node --check src/storage.js && node --check scripts/seed.js && node --check scripts/explain.js && node --check scripts/smoke.js",
+    "smoke": "node scripts/smoke.js",
+    "seed": "node scripts/seed.js",
+    "explain": "node scripts/explain.js"
+  },
+  "engines": {
+    "node": ">=20.19.0"
   },
   "repository": {
     "type": "git",
@@ -19,6 +26,10 @@
   },
   "homepage": "https://github.com/bishadow27/notes-api-2324802010323#readme",
   "dependencies": {
-    "express": "^5.3.0"
+    "@supabase/supabase-js": "^2.0.0",
+    "dotenv": "^17.0.0",
+    "express": "^5.3.0",
+    "mongoose": "^9.0.0",
+    "multer": "^2.0.0"
   }
 }
