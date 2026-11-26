@@ -15,7 +15,7 @@ Sinh viên: Nguyễn Duy Phúc — MSSV: 2324802010323.
 | Trivy Alpine và full | PASS: quét thực tế bằng GitHub Actions, chi tiết ở phần C |
 | Secret Protection và Push protection | Đã bật; xác nhận tại Settings → Advanced Security ngày 26/11/2026 |
 | Dependabot alerts | Đã bật cùng dependency graph ngày 26/11/2026; trạng thái danh sách cảnh báo cần kiểm tra riêng |
-| Codespaces Secrets | Tài khoản DuyPhuc-323 đã có SUPABASE_URL cho repository; ba secret còn lại chưa được xác nhận. Codespace hiện vẫn dùng .env riêng. |
+| Codespaces Secrets | PASS ngày 26/11/2026: bốn biến đã được cấp cho repository; server và các script kiểm thử chạy từ `/tmp`, dotenv nạp 0 biến từ `.env`. Kết nối Atlas, kiểm thử bảo mật và upload Supabase đều PASS. File `.env` vẫn tồn tại và không được Git theo dõi. |
 
 ## Đánh giá Network Access
 
@@ -35,7 +35,7 @@ Nếu mật khẩu bị lộ, đối tượng khác có thể đọc hoặc sử
 
 Thiết lập JWT_SECRET bằng ít nhất 32 byte ngẫu nhiên và cung cấp các biến Atlas/Supabase qua môi trường hoặc .env không được theo dõi. Ghi chú seed cũ không có owner của tài khoản mới nên không tự hiển thị sau khi bật xác thực; không tự ý chuyển quyền sở hữu dữ liệu. Bucket attachments đang Public: bất kỳ ai có URL có thể xem tệp, dù API đã kiểm tra quyền sở hữu. Muốn bảo vệ tệp phải dùng bucket private và URL ký có thời hạn.
 
-Script smoke của Bài 3 kiểm thử API không xác thực nên cần cập nhật trước khi chạy cho Bài 4. Kiểm thử Bài 4 dùng Atlas và upload hợp lệ lên Supabase đã PASS. Tệp upload mẫu được giữ trong bucket Public để đối chiếu; ảnh minh chứng và chạy không cần .env vẫn chưa hoàn tất.
+Script smoke của Bài 3 kiểm thử API không xác thực nên cần cập nhật trước khi chạy cho Bài 4. Kiểm thử Bài 4 dùng Atlas và upload hợp lệ lên Supabase đã PASS khi chạy bằng Codespaces Secrets từ `/tmp` không chứa `.env`. Tệp upload mẫu được giữ trong bucket Public để đối chiếu; ảnh minh chứng chưa được lưu vào repository.
 
 ## Phần C — Bảng kết quả quét lỗ hổng
 

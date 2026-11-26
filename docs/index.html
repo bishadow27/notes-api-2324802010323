@@ -921,7 +921,7 @@ CMD ["node", "src/server.js"]</code></pre>
         <section class="section" id="bai-4">
             <h2 class="section-title">BÀI 4: BẢO MẬT API VÀ QUẢN LÝ BÍ MẬT</h2>
             <p>Mục tiêu: quản lý bí mật ngoài mã nguồn, xác thực JWT, giới hạn quyền theo chủ sở hữu và kiểm tra lỗ hổng phụ thuộc.</p>
-            <h3>Phần A — Bí mật</h3><p>Tệp .env được Git bỏ qua. Secret Protection và Push Protection đã bật; Dependency graph và Dependabot alerts đã được bật. Codespaces Secrets đang được cấu hình và chưa đủ bốn giá trị.</p>
+            <h3>Phần A — Bí mật</h3><p>Tệp .env được Git bỏ qua. Secret Protection và Push Protection đã bật; Dependency graph và Dependabot alerts đã được bật. Bốn Codespaces Secrets đã được cấp cho repository. Ngày 26/11/2026, server và script kiểm thử chạy từ /tmp, dotenv nạp 0 biến từ .env; kết nối Atlas, xác thực và upload Supabase đều PASS. File .env vẫn được giữ trong Codespace.</p>
             <h3>Phần B — Xác thực và phân quyền</h3><p>Đăng ký băm mật khẩu bằng bcrypt; đăng nhập tạo JWT thời hạn một giờ. Notes yêu cầu Bearer token và truy vấn theo owner từ token. Helmet, sanitizeFilter, giới hạn JSON 100 KB và giới hạn 20 yêu cầu xác thực mỗi 15 phút đã được cấu hình. Kiểm thử trên Codespace kết nối Atlas: đăng ký 201, đăng nhập 200; thiếu, sai hoặc hết hạn token 401; người B GET/PUT/DELETE/upload ghi chú của A nhận 404; đầu vào NoSQL injection nhận 401. Dữ liệu thử được dọn sau khi chạy.</p>
             <p>Kiểm thử cục bộ: không token 401; đầu vào đăng nhập dạng object bị từ chối; 20 yêu cầu đầu nhận 401 và yêu cầu thứ 21 nhận 429. Bucket Public vẫn cho phép người có URL đọc tệp: môi trường cần bảo mật nên dùng bucket private và URL ký có thời hạn.</p>
             <h3>Phần C — Quét lỗ hổng</h3>
@@ -934,7 +934,7 @@ CMD ["node", "src/server.js"]</code></pre>
             <p><strong>2. Alpine:</strong> ít gói thường dẫn đến ít mục lỗ hổng được báo cáo hơn, nhưng tổng số không chứng minh an toàn vì cần xét khả năng khai thác, cấu hình, thành phần được quét và bản vá.</p>
             <p><strong>3. Trách nhiệm chia sẻ:</strong> MongoDB và Supabase vận hành phần dịch vụ theo phạm vi cam kết; nhóm phát triển quản lý quyền, bí mật, cấu hình mạng và an toàn mã ứng dụng.</p>
             <p><strong>Upload có xác thực:</strong> chủ ghi chú dùng JWT hợp lệ upload tệp mẫu đạt HTTP 200; attachmentUrl đạt HTTP 200 và nội dung khớp. Đã kiểm tra tệp trong bucket attachments. Tài khoản và ghi chú thử được dọn, tệp mẫu được giữ để đối chiếu.</p>
-            <p><strong>Kết luận:</strong> kiểm thử bảo mật trên Atlas, upload Supabase và quét image đã chạy thành công. Đầy đủ Codespaces Secrets, chạy không cần .env và ảnh minh chứng vẫn cần hoàn thiện. <a href="BAO_CAO_BAI_4.md">Xem báo cáo chi tiết</a>.</p>
+            <p><strong>Kết luận:</strong> kiểm thử bảo mật trên Atlas và upload Supabase đã PASS khi chạy bằng Codespaces Secrets mà không đọc .env. Quét image đã được thực hiện trong lần chạy trước; ảnh minh chứng vẫn cần bổ sung. <a href="BAO_CAO_BAI_4.md">Xem báo cáo chi tiết</a>.</p>
         </section>
     </main>
 
