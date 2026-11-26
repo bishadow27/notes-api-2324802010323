@@ -85,3 +85,27 @@ Nhánh Bài 4 yêu cầu `JWT_SECRET` có ít nhất 32 byte, bên cạnh các b
 `npm test` kiểm tra không token, đầu vào object và yêu cầu thứ 21 nhận 429 mà không cần database. `npm run smoke` cũ của Bài 3 chưa gửi token nên không dùng để chứng minh CRUD của Bài 4. Ghi chú cũ chưa gắn owner hợp lệ không tự hiện cho tài khoản mới; không chuyển quyền sở hữu nếu chưa xác định chủ sở hữu.
 
 Bucket `attachments` hiện là Public: người có URL vẫn đọc được tệp, ngay cả khi không được API cấp quyền. Muốn bảo mật tệp thật cần bucket private và cơ chế cung cấp URL ký sau khi kiểm tra quyền. `trust proxy = 1` phù hợp khi có đúng một reverse proxy đáng tin cậy; điều chỉnh theo môi trường khi triển khai.
+
+## Bài 4 — quét Docker image và thu thập minh chứng
+
+Có thể chạy không cần Codespaces bằng GitHub Actions: mở tab **Actions**, chọn workflow **Lab 4 security and Trivy**, chọn nhánh **bai-4-api-security** nếu có nút Run workflow. Workflow chạy khi push lên nhánh Bài 4; nếu GitHub chưa hiển thị workflow để chạy thủ công trên nhánh chưa merge, dùng run được kích hoạt từ push.
+
+Workflow không dùng thông tin kết nối Atlas/Supabase. Nó chạy npm ci, kiểm tra cú pháp, kiểm thử HTTP không cần DB, npm audit và Trivy trên hai Docker image. Tải artifact **lab04-results**, đọc file **trivy-comparison.md**, chụp màn hình trang Summary/log của lần chạy thật. Không coi workflow thành công là bằng chứng đã kiểm thử ownership trên Atlas.
+
+Hoặc chạy tại máy có Docker:
+
+~~~bash
+npm ci
+npm run check
+npm test
+npm audit --omit=dev
+bash scripts/trivy-scan.sh /tmp/lab04-scan
+~~~
+
+Script lấy dung lượng thực tế từ docker image inspect và đếm HIGH/CRITICAL trong kết quả JSON Trivy. Các file kết quả, thời điểm quét và image ID được lưu trong thư mục đầu ra.
+
+Với Codespaces Secrets: cấu hình MONGODB_URI, SUPABASE_URL, SUPABASE_SERVICE_KEY và JWT_SECRET trong tài khoản chạy Codespaces, cấp quyền cho repo, rebuild/restart môi trường và xác nhận biến tồn tại mà không in giá trị. Các biến của tài khoản khác không tự chuyển sang. Sau khi xác nhận đầy đủ, xóa .env tại môi trường thực hành.
+
+Kiểm thử Atlas: chạy npm start và npm run security:smoke ở terminal khác. Cần credentials hợp lệ, database dành cho lab. Không in token hoặc key trong ảnh. Kiểm thử đăng nhập thứ 21 dùng lượt test riêng vì rate limit áp dụng cho toàn bộ /auth, kể cả register.
+
+Xem mẫu báo cáo và danh sách minh chứng: [docs/BAO_CAO_BAI_4.md](docs/BAO_CAO_BAI_4.md).
