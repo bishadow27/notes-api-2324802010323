@@ -1,0 +1,46 @@
+name: Lab 4 security and Trivy
+on:
+  workflow_dispatch:
+  push:
+    branches: [bai-4-api-security]
+permissions:
+  contents: read
+jobs:
+  lab04:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install and run security tests
+        shell: bash
+        run: |
+          mkdir -p lab04-results
+          npm ci
+          npm run check 2>&1 | tee lab04-results/syntax-check.txt
+          npm test 2>&1 | tee lab04-results/security-tests.txt
+      - name: Audit dependencies
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p lab04-results
+          set +e
+          npm audit --omit=dev --json > lab04-results/npm-audit.json
+          result=$?
+          echo "$result" > lab04-results/npm-audit-exit-code.txt
+          cat lab04-results/npm-audit.json
+      - name: Build and scan both Docker images
+        shell: bash
+        run: |
+          bash scripts/trivy-scan.sh lab04-results
+          cat lab04-results/trivy-comparison.md >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload real lab results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lab04-results
+          path: lab04-results/
+          if-no-files-found: warn
