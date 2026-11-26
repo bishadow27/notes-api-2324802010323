@@ -6,19 +6,23 @@ Sinh viên: Nguyễn Duy Phúc — MSSV: 2324802010323.
 
 | Kiểm tra | Kết quả |
 | --- | --- |
-| npm test | Bản ghi trước đây báo PASS 3 kiểm thử; cần chạy lại sau khi cập nhật test để xác minh 401 và 429 chính xác ở yêu cầu thứ 21 |
-| npm run check | PASS: kiểm tra cú pháp theo script hiện có của Bài 3 |
+| npm ci, npm run check | PASS: cài đúng lockfile và kiểm tra cú pháp các tệp trong script |
+| npm test | PASS: 4 kiểm thử; không token, token sai/hết hạn 401; kiểm tra header Helmet; yêu cầu 1–20 nhận 401 và yêu cầu 21 nhận 429 |
 | npm audit --omit=dev | PASS: 0 lỗ hổng được báo cáo |
-| Quét lịch sử Git | Không tìm thấy chuỗi khớp một số mẫu MongoDB URI, Supabase secret và JWT; không kết luận chắc chắn không có bí mật |
+| Quét lịch sử Git | Sau khi lấy các nhánh, `git log --all -p` không có chuỗi khớp một số mẫu MongoDB URI, Supabase secret và JWT; phương pháp này không phát hiện mọi loại bí mật |
 | Đăng ký, đăng nhập và phân quyền chéo với Atlas | CHƯA CHẠY: chưa cấu hình thông tin kết nối trên máy |
-| Trivy Alpine và full | CHƯA CHẠY: chưa có Docker CLI/daemon trên máy; không có số liệu để báo cáo |
-| Push protection và Dependabot | CHƯA XÁC MINH |
+| Trivy Alpine và full | PASS: quét thực tế bằng GitHub Actions, chi tiết ở phần C |
+| Secret Protection và Push protection | Đã bật; xác nhận tại Settings → Advanced Security ngày 26/11/2026 |
+| Dependabot alerts | Đã bật cùng dependency graph ngày 26/11/2026; trạng thái danh sách cảnh báo cần kiểm tra riêng |
+| Codespaces Secrets | Chưa có secret nào trước khi cấu hình; đang chuẩn bị nhập MONGODB_URI |
 
 ## Đánh giá Network Access
 
 | Rủi ro | Biện pháp bù trừ | Phương án tốt hơn |
 | --- | --- | --- |
 | 0.0.0.0/0 cho phép mọi địa chỉ IP thử kết nối, làm tăng nguy cơ dò mật khẩu và bị truy cập nếu lộ thông tin xác thực. | Quyền user chỉ readWrite database notes; TLS, mật khẩu đủ mạnh, giữ secret ngoài mã và đổi khi lộ. | Giới hạn IP cố định hoặc Private Endpoint/VPC peering nếu dịch vụ và chi phí cho phép. |
+
+Nếu mật khẩu bị lộ, đối tượng khác có thể đọc hoặc sửa dữ liệu trong phạm vi quyền của user `notes_app`; TLS không ngăn người đã có mật khẩu hợp lệ đăng nhập. Giới hạn IP cố định cần nguồn IP ổn định và duy trì allowlist; Codespaces có IP thay đổi. Private Endpoint và VPC peering cần kiểm tra hỗ trợ gói, mạng và chi phí thực tế; chưa triển khai ở đây. Mật khẩu từng được chia sẻ trong hội thoại nên cần thay bằng mật khẩu ngẫu nhiên mới; chưa khẳng định đã thay.
 
 ## Câu hỏi phản biện
 
@@ -38,12 +42,14 @@ Chạy `bash scripts/trivy-scan.sh /tmp/lab04-scan` hoặc lấy artifact `lab04
 
 | Image | Kích thước (MiB) | HIGH | CRITICAL |
 | --- | ---: | ---: | ---: |
-| node:22-alpine | Chưa đo | Chưa đo | Chưa đo |
-| node:22 | Chưa đo | Chưa đo | Chưa đo |
+| Ứng dụng từ node:22-alpine | 68,15 | 10 | 0 |
+| Ứng dụng từ node:22 | 399,20 | 479 | 20 |
 
-Thời điểm quét (UTC): [điền từ scan-utc.txt].
+Thời điểm quét: 2026-11-26 06:46:19 UTC (13:46:19 giờ Việt Nam). [GitHub Actions run 45770439122](https://github.com/bishadow27/notes-api-2324802010323/actions/runs/45770439122) chạy thành công tại commit 971fc4c. Trivy image `aquasec/trivy:latest` có digest `sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb`. Hai image là image ứng dụng được build từ hai base image tương ứng, không phải kích thước base image thuần.
 
 Đơn vị: 1 MiB = 1.048.576 byte, kích thước lấy từ Docker image inspect. Số cảnh báo đếm từng mục lỗ hổng Trivy trên các target, không khử trùng lặp giữa target. Ưu tiên đánh giá CRITICAL trước HIGH, khả năng bị khai thác, mức ảnh hưởng, bản sửa khả dụng; không chỉ dựa vào tổng số.
+
+Kết quả cho thấy image dùng Alpine có bề mặt gói được báo cáo nhỏ hơn trong lần quét này. Với 20 mục CRITICAL ở image đầy đủ, cần đọc từng CVE trong artifact để xác định gói, đường khai thác và bản vá trước khi ưu tiên; không suy ra tất cả đều khai thác được qua API. Lần quét không chứng minh image không có lỗ hổng chưa được công bố.
 
 ## Minh chứng Bài 4
 

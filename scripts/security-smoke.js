@@ -2,6 +2,7 @@ require('dotenv').config({ quiet: true });
 const assert = require('node:assert/strict');
 const { randomUUID } = require('node:crypto');
 const mongoose = require('mongoose');
+const jwt = require('jsonwebtoken');
 const User = require('../src/models/user');
 const base = process.env.API_URL || 'http://127.0.0.1:3000';
 const password = randomUUID() + 'Aa1!';
@@ -24,6 +25,10 @@ async function request(path, method = 'GET', body, token) {
 async function main() {
   assert.equal((await request('/notes')).status, 401);
   console.log('PASS GET /notes không token: 401');
+  assert.equal((await request('/notes', 'GET', undefined, 'invalid')).status, 401);
+  const expired = jwt.sign({ sub: 'expired-test' }, process.env.JWT_SECRET, { expiresIn: -1 });
+  assert.equal((await request('/notes', 'GET', undefined, expired)).status, 401);
+  console.log('PASS token không hợp lệ và hết hạn: 401');
   for (const email of emails) {
     const registration = await request('/auth/register', 'POST', { email, password });
     assert.equal(registration.status, 201, 'đăng ký người dùng thử');
@@ -32,6 +37,7 @@ async function main() {
   const loginA = await request('/auth/login', 'POST', { email: emails[0], password });
   const loginB = await request('/auth/login', 'POST', { email: emails[1], password });
   assert.equal(loginA.status, 200); assert.equal(loginB.status, 200);
+  assert.equal((await request('/auth/login', 'POST', { email: emails[0], password: password + 'wrong' })).status, 401);
   tokenA = loginA.body.token;
   assert.equal((await request('/notes', 'GET', undefined, tokenA)).status, 200);
   const note = await request('/notes', 'POST', { title: 'Lab 4 ownership test' }, tokenA);
@@ -39,9 +45,13 @@ async function main() {
   assert.equal((await request(`/notes/${noteId}`, 'GET', undefined, loginB.body.token)).status, 404);
   assert.equal((await request(`/notes/${noteId}`, 'PUT', { title: 'unauthorized' }, loginB.body.token)).status, 404);
   assert.equal((await request(`/notes/${noteId}`, 'DELETE', undefined, loginB.body.token)).status, 404);
+  const file = new FormData();
+  file.append('file', new Blob(['Lab 4 owner test'], { type: 'text/plain' }), 'test.txt');
+  const crossUpload = await fetch(`${base}/notes/${noteId}/attachment`, { method: 'POST', headers: { authorization: `Bearer ${loginB.body.token}` }, body: file });
+  assert.equal(crossUpload.status, 404);
   assert.equal((await request('/auth/login', 'POST', { email: { $gt: '' }, password: 'x' })).status, 401);
   console.log('PASS đăng ký, đăng nhập: 201/200');
-  console.log('PASS người B GET/PUT/DELETE ghi chú của A: 404');
+  console.log('PASS người B GET/PUT/DELETE/upload ghi chú của A: 404');
   console.log('PASS đầu vào NoSQL injection: 401');
 }
 main().then(() => console.log('Kiểm thử bảo mật hoàn thành.')).catch(err => {
