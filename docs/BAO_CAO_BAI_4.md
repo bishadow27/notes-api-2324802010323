@@ -10,11 +10,11 @@ Sinh viên: Nguyễn Duy Phúc — MSSV: 2324802010323.
 | npm test | PASS: 4 kiểm thử; không token, token sai/hết hạn 401; kiểm tra header Helmet; yêu cầu 1–20 nhận 401 và yêu cầu 21 nhận 429 |
 | npm audit --omit=dev | PASS: 0 lỗ hổng được báo cáo |
 | Quét lịch sử Git | Sau khi lấy các nhánh, `git log --all -p` không có chuỗi khớp một số mẫu MongoDB URI, Supabase secret và JWT; phương pháp này không phát hiện mọi loại bí mật |
-| Đăng ký, đăng nhập và phân quyền chéo với Atlas | CHƯA CHẠY: chưa cấu hình thông tin kết nối trên máy |
+| Đăng ký, đăng nhập và phân quyền chéo với Atlas | PASS trong Codespace: đăng ký 201, đăng nhập 200; thiếu, sai hoặc hết hạn token 401; người B truy cập GET/PUT/DELETE/upload ghi chú của A nhận 404; đầu vào NoSQL injection nhận 401. Script dọn tài khoản và ghi chú thử. |
 | Trivy Alpine và full | PASS: quét thực tế bằng GitHub Actions, chi tiết ở phần C |
 | Secret Protection và Push protection | Đã bật; xác nhận tại Settings → Advanced Security ngày 26/11/2026 |
 | Dependabot alerts | Đã bật cùng dependency graph ngày 26/11/2026; trạng thái danh sách cảnh báo cần kiểm tra riêng |
-| Codespaces Secrets | Chưa có secret nào trước khi cấu hình; đang chuẩn bị nhập MONGODB_URI |
+| Codespaces Secrets | Đã thấy MONGODB_URI trong tài khoản chủ kho; Codespace chạy dưới tài khoản khác và dùng .env riêng. Chưa xác nhận đủ bốn Codespaces Secrets. |
 
 ## Đánh giá Network Access
 
@@ -34,7 +34,7 @@ Nếu mật khẩu bị lộ, đối tượng khác có thể đọc hoặc sử
 
 Thiết lập JWT_SECRET bằng ít nhất 32 byte ngẫu nhiên và cung cấp các biến Atlas/Supabase qua môi trường hoặc .env không được theo dõi. Ghi chú seed cũ không có owner của tài khoản mới nên không tự hiển thị sau khi bật xác thực; không tự ý chuyển quyền sở hữu dữ liệu. Bucket attachments đang Public: bất kỳ ai có URL có thể xem tệp, dù API đã kiểm tra quyền sở hữu. Muốn bảo vệ tệp phải dùng bucket private và URL ký có thời hạn.
 
-Script smoke của Bài 3 kiểm thử API không xác thực nên cần cập nhật trước khi chạy cho Bài 4. Chưa chạy thử dịch vụ thực tế; không đánh dấu hoàn tất bài.
+Script smoke của Bài 3 kiểm thử API không xác thực nên cần cập nhật trước khi chạy cho Bài 4. Kiểm thử Bài 4 dùng Atlas thật đã PASS; thử upload hợp lệ lên Supabase trong Bài 4 và ảnh minh chứng vẫn chưa được xác minh. Kiểm thử upload chéo 404 chỉ chứng minh phân quyền, không chứng minh upload thành công.
 
 ## Phần C — Bảng kết quả quét lỗ hổng
 
