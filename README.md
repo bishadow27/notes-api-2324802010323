@@ -76,4 +76,12 @@ npm run explain
 
 ## Lưu ý bảo mật
 
-API thực hành chưa có xác thực người dùng. Không triển khai công khai lâu dài khi chưa bổ sung authentication/authorization. Việc mở Atlas tới **0.0.0.0/0** chỉ nên dùng tạm trong bài lab và cần thu hẹp sau khi thực hành. Bucket public chỉ dành cho tệp mẫu không nhạy cảm.
+API Bài 3 chưa có xác thực người dùng; Bài 4 bổ sung xác thực và kiểm tra quyền. Việc mở Atlas tới **0.0.0.0/0** chỉ nên dùng tạm trong bài lab và cần thu hẹp sau khi thực hành. Bucket public chỉ dành cho tệp mẫu không nhạy cảm.
+
+## Bài 4 — xác thực và kiểm thử
+
+Nhánh Bài 4 yêu cầu `JWT_SECRET` có ít nhất 32 byte, bên cạnh các biến MongoDB và Supabase trong `.env.example`. Đặt thông tin thật trong `.env` không được Git theo dõi hoặc trong biến môi trường. Chạy `npm install`, `npm run check`, `npm test` và `npm audit --omit=dev`. Bật server bằng `npm start`, sau đó trong terminal khác chạy `npm run security:smoke`: script tạo hai tài khoản thử có tên ngẫu nhiên, xác minh truy cập chéo và tự dọn dữ liệu do script tạo nếu kết nối database hoạt động. Script yêu cầu cùng MongoDB URI với server; không chạy trên database không được phép ghi thử.
+
+`npm test` kiểm tra không token, đầu vào object và yêu cầu thứ 21 nhận 429 mà không cần database. `npm run smoke` cũ của Bài 3 chưa gửi token nên không dùng để chứng minh CRUD của Bài 4. Ghi chú cũ chưa gắn owner hợp lệ không tự hiện cho tài khoản mới; không chuyển quyền sở hữu nếu chưa xác định chủ sở hữu.
+
+Bucket `attachments` hiện là Public: người có URL vẫn đọc được tệp, ngay cả khi không được API cấp quyền. Muốn bảo mật tệp thật cần bucket private và cơ chế cung cấp URL ký sau khi kiểm tra quyền. `trust proxy = 1` phù hợp khi có đúng một reverse proxy đáng tin cậy; điều chỉnh theo môi trường khi triển khai.

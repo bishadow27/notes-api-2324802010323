@@ -1,9 +1,17 @@
 const express = require('express');
 const os = require('os');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+const mongoose = require('mongoose');
 const notesRouter = require('./routes/notes');
+const authRouter = require('./routes/auth');
 
 const app = express();
-app.use(express.json({ limit: '1mb' }));
+mongoose.set('sanitizeFilter', true);
+app.set('trust proxy', 1);
+app.use(helmet());
+app.use(express.json({ limit: '100kb' }));
+app.use('/auth', rateLimit({ windowMs: 15 * 60 * 1000, limit: 20 }), authRouter);
 
 // Keep the Hello Cloud API endpoint from Lab 1.
 app.get('/', (req, res) => {

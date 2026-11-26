@@ -3,8 +3,10 @@ const multer = require('multer');
 const { randomUUID } = require('node:crypto');
 const Note = require('../models/note');
 const { bucket } = require('../storage');
+const requireAuth = require('../middleware/auth');
 
 const router = express.Router();
+router.use(requireAuth);
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -13,14 +15,15 @@ const upload = multer({
 
 // READ: list the newest 50 notes; optionally filter by tag.
 router.get('/', async (req, res) => {
-  const filter = req.query.tag ? { tags: String(req.query.tag) } : {};
+  const filter = { owner: req.user.sub };
+  if (req.query.tag) filter.tags = String(req.query.tag);
   const notes = await Note.find(filter).sort({ createdAt: -1 }).limit(50);
   res.json(notes);
 });
 
 // READ: get one note.
 router.get('/:id', async (req, res) => {
-  const note = await Note.findById(req.params.id);
+  const note = await Note.findOne({ _id: req.params.id, owner: req.user.sub });
   if (!note) return res.status(404).json({ error: 'Không tìm thấy ghi chú' });
   res.json(note);
 });
@@ -28,7 +31,7 @@ router.get('/:id', async (req, res) => {
 // CREATE.
 router.post('/', async (req, res) => {
   const { title, content, tags } = req.body ?? {};
-  const note = await Note.create({ title, content, tags });
+  const note = await Note.create({ title, content, tags, owner: req.user.sub });
   res.status(201).json(note);
 });
 
@@ -41,7 +44,7 @@ router.put('/:id', async (req, res) => {
   if (content !== undefined) update.content = content;
   if (tags !== undefined) update.tags = tags;
 
-  const note = await Note.findByIdAndUpdate(req.params.id, update, {
+  const note = await Note.findOneAndUpdate({ _id: req.params.id, owner: req.user.sub }, update, {
     new: true,
     runValidators: true
   });
@@ -52,7 +55,7 @@ router.put('/:id', async (req, res) => {
 
 // DELETE.
 router.delete('/:id', async (req, res) => {
-  const note = await Note.findByIdAndDelete(req.params.id);
+  const note = await Note.findOneAndDelete({ _id: req.params.id, owner: req.user.sub });
   if (!note) return res.status(404).json({ error: 'Không tìm thấy ghi chú' });
   res.status(204).end();
 });
@@ -63,7 +66,7 @@ router.post('/:id/attachment', upload.single('file'), async (req, res) => {
     return res.status(400).json({ error: 'Thiếu tệp ở trường "file"' });
   }
 
-  const note = await Note.findById(req.params.id);
+  const note = await Note.findOne({ _id: req.params.id, owner: req.user.sub });
   if (!note) return res.status(404).json({ error: 'Không tìm thấy ghi chú' });
 
   const safeName = String(req.file.originalname || 'attachment')
